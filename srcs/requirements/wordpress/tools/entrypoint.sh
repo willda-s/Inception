@@ -1,7 +1,10 @@
 #!/bin/sh
 mkdir -p /run/php
 chown www-data:www-data /run/php
-
+until mariadb -h mariadb -u ${MYSQL_USER} -p$(cat /run/secrets/db_password) -e "SELECT 1" > /dev/null 2>&1
+do
+	sleep 2
+done
 if [ ! -f /var/www/html/wp-config.php ]; then
 	DB_PASS=$(cat /run/secrets/db_password)
 	WP_ADMIN_PASS=$(cat /run/secrets/wp_admin_password)
