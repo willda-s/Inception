@@ -1,5 +1,6 @@
 FROM debian:bookworm
 RUN apt-get update && apt-get install -y nginx openssl && rm -rf /var/lib/apt/lists/*
+RUN rm -f /var/www/html/index.nginx-debian.html
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/ssl/private/inception.key \
     -out /etc/ssl/certs/inception.crt \
