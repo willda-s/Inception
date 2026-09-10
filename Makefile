@@ -11,6 +11,6 @@ clean:
 fclean: clean
 	sudo rm -rf /home/willda-s/data/mariadb /home/willda-s/data/wordpress
 
-re: clean all
+re: fclean all
 
 .PHONY: all down clean fclean re

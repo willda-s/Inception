@@ -61,7 +61,7 @@ make          # create the data directories, build the images, start the stack
 make down     # stop and remove the containers
 make clean    # stop the containers and remove the Docker volumes
 make fclean   # same as clean, plus delete the data directories on the host
-make re       # clean, then rebuild everything
+make re       # fclean, then rebuild everything
 ```
 
 Once running, the site is available at `https://willda-s.42.fr` and the
@@ -112,13 +112,13 @@ This project uses both technologies in tandem. A virtual machine acts as the iso
 
 ### Secrets vs Environment Variables
 
-Environment variables store parameters in memory and pass them via CLI or compose files, while Docker secrets mount sensitive data as read-only files inside /run/secrets/. Environment variables easily leak through docker inspect commands, process inspection via /proc/<pid>/environ, crash logs, and child process inheritance. Docker secrets avoid these vulnerabilities by isolating access to the filesystem layer at runtime.
+Environment variables store parameters in memory and pass them via CLI or compose files, while Docker secrets mount sensitive data as read-only files inside /run/secrets/. Environment variables easily leak through `docker inspect` commands, process inspection via `/proc/<pid>/environ`, crash logs, and child process inheritance. Docker secrets avoid these vulnerabilities by isolating access to the filesystem layer at runtime.
 
 To keep the application secure, environment variables are strictly limited to non-sensitive runtime configurations like database names or domain names. Sensitive credentials like passwords are managed through Docker secrets and loaded from disk, ensuring secrets are never committed to Git repositories or baked permanently into Dockerfile build layers.
 
 ### Docker Network vs Host Network
 
-A custom bridge network gives every container its own network namespace and private IP address, and enables service discovery by name through Docker's embedded DNS resolver at 127.0.0.11. The resolver exists on the default bridge network too, but it does not resolve container names there — a legacy of the deprecated --link mechanism, which the subject forbids. On the default bridge, containers can only reach each other by IP, and those addresses change on every recreation. A custom bridge resolves service names dynamically, which is what makes fastcgi_pass wordpress:9000; possible without hardcoding an address.
+A custom bridge network gives every container its own network namespace and private IP address, and enables service discovery by name through Docker's embedded DNS resolver at 127.0.0.11. The resolver exists on the default bridge network too, but it does not resolve container names there — a legacy of the deprecated `--link` mechanism, which the subject forbids. On the default bridge, containers can only reach each other by IP, and those addresses change on every recreation. A custom bridge resolves service names dynamically, which is what makes `fastcgi_pass wordpress:9000`; possible without hardcoding an address.
 
 Host network mode removes network boundaries entirely: containers share the host's network interface directly, losing both isolation and name-based discovery, and exposing every listening port to the host — with the port collisions that follow.
 
@@ -126,7 +126,7 @@ Using a custom bridge guarantees that NGINX remains the sole exposed entry point
 
 ### Docker Volumes vs Bind Mounts
 
-Docker volumes are fully managed by the Docker Engine within isolated internal storage paths, whereas bind mounts map a container folder directly to an explicit path on the host filesystem. This project uses a named volume configured with driver_opts (type: none, o: bind), combining Docker's managed volume lifecycle with explicit host location mapping under /home/willda-s/data/....
+Docker volumes are fully managed by the Docker Engine within isolated internal storage paths, whereas bind mounts map a container folder directly to an explicit path on the host filesystem. This project uses a named volume configured with `driver_opts` (type: none, o: bind), combining Docker's managed volume lifecycle with explicit host location mapping under /home/willda-s/data/....
 
 Because the storage is registered as a named volume backed by a host location, executing docker compose down -v safely unregisters the volume metadata from Docker's internal system. The physical database files and media uploads remain completely safe and intact on the host directory.
 
