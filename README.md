@@ -128,7 +128,7 @@ Using a custom bridge guarantees that NGINX remains the sole exposed entry point
 
 Docker volumes are fully managed by the Docker Engine within isolated internal storage paths, whereas bind mounts map a container folder directly to an explicit path on the host filesystem. This project uses a named volume configured with `driver_opts` (type: none, o: bind), combining Docker's managed volume lifecycle with explicit host location mapping under /home/willda-s/data/....
 
-Because the storage is registered as a named volume backed by a host location, executing docker compose down -v safely unregisters the volume metadata from Docker's internal system. The physical database files and media uploads remain completely safe and intact on the host directory.
+Because this project uses `driver_opts` with `o: bind`, the storage lives outside Docker's own volume directory. This changes what `docker compose down -v` actually does: it unregisters the volume from Docker, but the files under `/home/willda-s/data/` remain on the host. A standard Docker volume, by contrast, would have its data deleted by the same command. This is a side effect of the configuration rather than a guarantee, which is why the Makefile provides a separate `fclean` target that removes those directories explicitly — the only way to return to a genuinely empty state.
 
 ## Resources
 
